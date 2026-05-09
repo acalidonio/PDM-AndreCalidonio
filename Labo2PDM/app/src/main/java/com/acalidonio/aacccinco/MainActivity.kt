@@ -203,6 +203,7 @@ fun NameListScreen() {
 @Composable
 fun SensorScreen() {
     val lightValues = useSensor(Sensor.TYPE_LIGHT)
+    val gyroscopeValues = useSensor(Sensor.TYPE_GYROSCOPE)
     val lux = if (lightValues.isNotEmpty()) lightValues[0] else 0f
 
     val isDark = lux < 20f
@@ -218,6 +219,30 @@ fun SensorScreen() {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Text(
+                text = "Giroscopio",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = textColor
+            )
+            Text(
+                text = "X:${gyroscopeValues[0]}",
+                fontSize = 18.sp,
+                color = textColor
+            )
+            Text(
+                text = "Y:${gyroscopeValues[1]}",
+                fontSize = 18.sp,
+                color = textColor
+            )
+            Text(
+                text = "Z:${gyroscopeValues[2]}",
+                fontSize = 18.sp,
+                color = textColor
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             Text(
                 text = "Sensor de Luz",
                 fontSize = 24.sp,

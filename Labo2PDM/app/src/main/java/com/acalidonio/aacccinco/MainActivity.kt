@@ -1,9 +1,15 @@
 package com.acalidonio.aacccinco
 
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -74,7 +82,7 @@ fun AppNavigation() {
             NameListScreen()
         }
         composable<SensorDetail> {
-            //SensorScreen()
+            SensorScreen()
         }
     }
 }
@@ -190,4 +198,72 @@ fun NameListScreen() {
             }
         }
     }
+}
+
+@Composable
+fun SensorScreen() {
+    val lightValues = useSensor(Sensor.TYPE_LIGHT)
+    val lux = if (lightValues.isNotEmpty()) lightValues[0] else 0f
+
+    val isDark = lux < 20f
+    val backgroundColor = if (isDark) Color.Black else Color.White
+    val textColor = if (isDark) Color.White else Color.Black
+
+    Scaffold { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(backgroundColor)
+                .padding(innerPadding),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Sensor de Luz",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = textColor
+            )
+            Text(
+                text = "Intensidad: $lux lx",
+                fontSize = 18.sp,
+                color = textColor
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Text(
+                text = if (isDark) "Modo Oscuro Activado" else "Modo Claro Activado",
+                color = if (isDark) Color.Yellow else Color.Gray
+            )
+        }
+    }
+}
+
+@Composable
+fun useSensor(sensorType: Int): List<Float> {
+    val context = LocalContext.current
+    val sensorManager = remember { context.getSystemService(Context.SENSOR_SERVICE) as SensorManager }
+    val sensor = sensorManager.getDefaultSensor(sensorType) ?: return emptyList()
+    var sensorValues by remember { mutableStateOf(listOf(0f, 0f, 0f)) }
+
+    DisposableEffect(sensorType) {
+        val listener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent?) {
+                event?.values?.let {
+                    sensorValues = it.toList()
+                }
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+        }
+
+        sensorManager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_UI)
+
+        onDispose {
+            sensorManager.unregisterListener(listener)
+        }
+    }
+
+    return sensorValues
 }

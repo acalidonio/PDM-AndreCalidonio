@@ -204,6 +204,8 @@ fun NameListScreen() {
 fun SensorScreen() {
     val lightValues = useSensor(Sensor.TYPE_LIGHT)
     val gyroscopeValues = useSensor(Sensor.TYPE_GYROSCOPE)
+    val proximityValues = useSensor(Sensor.TYPE_PROXIMITY)
+
     val lux = if (lightValues.isNotEmpty()) lightValues[0] else 0f
 
     val isDark = lux < 20f
@@ -237,6 +239,20 @@ fun SensorScreen() {
             )
             Text(
                 text = "Z:${gyroscopeValues[2]}",
+                fontSize = 18.sp,
+                color = textColor
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "Sensor de Proximidad",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = textColor
+            )
+            Text(
+                text = "Distancia:${proximityValues[0]} cm",
                 fontSize = 18.sp,
                 color = textColor
             )
